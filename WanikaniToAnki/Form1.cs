@@ -39,7 +39,7 @@ namespace WanikaniToAnki
             // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = true;
-            aTimer.Enabled = true;
+            
         }
 
         private static void OnTimedEvent(object sender, ElapsedEventArgs e)
@@ -172,6 +172,7 @@ namespace WanikaniToAnki
 
         private void Form1_Shown(object sender, EventArgs e)
         {
+            SetTimer();
             label2.Text = "ready";
             label3.Text = "ready";
             ToolTip toolTip1 = new ToolTip();
@@ -188,6 +189,7 @@ namespace WanikaniToAnki
         {
             label2.Text = "initializing";
             button1.Enabled = false;
+            
             workerthread = new Thread(_init);
             workerthread.Start();
         }
@@ -303,7 +305,7 @@ namespace WanikaniToAnki
             }
             textBox1.Clear();
             textBox2.Clear();
-            SetTimer();
+            aTimer.Enabled = true;
             Thread t = new Thread(apistuff);
             t.Start();
         }
@@ -380,7 +382,7 @@ namespace WanikaniToAnki
                             {
                                 Console.WriteLine("DOUBLE : " + a.Data.SubjectId);
                             }
-                            textBox1.Invoke((MethodInvoker)(() => textBox1.Text += kanji[a.Data.SubjectId].characters + ", "));
+                            textBox1.Invoke((MethodInvoker)(() => textBox1.AppendText( kanji[a.Data.SubjectId].characters + ", ")));
 
                         }
                         else if (a.Data.SubjectType == "vocabulary")
@@ -424,7 +426,7 @@ namespace WanikaniToAnki
                             {
                                 Console.WriteLine("DOUBLE " + vocab.data.characters);
                             }
-                            textBox2.Invoke((MethodInvoker)(() => textBox2.Text += voc[a.Data.SubjectId].characters + ", "));
+                            textBox2.Invoke((MethodInvoker)(() => textBox2.AppendText(voc[a.Data.SubjectId].characters + ", ")));
                         }
                     }
 
