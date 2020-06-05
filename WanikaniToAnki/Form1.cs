@@ -31,6 +31,7 @@ namespace WanikaniToAnki
         static int timeuntilreset = 61;
         static System.Timers.Timer aTimer;
         Thread workerthread;
+        string imgPath;
 
         private static void SetTimer()
         {
@@ -173,6 +174,7 @@ namespace WanikaniToAnki
         private void Form1_Shown(object sender, EventArgs e)
         {
             SetTimer();
+            
             label2.Text = "ready";
             label3.Text = "ready";
             ToolTip toolTip1 = new ToolTip();
@@ -180,8 +182,18 @@ namespace WanikaniToAnki
             toolTip1.SetToolTip(checkBox2, "if checked, will fetch all kanji and vocabulary from wanikani,\n ignoring the already downloaded data in the genereated csv files.\n will take more time depending on the amount of unlocked lessons.");
             if (File.Exists(Directory.GetCurrentDirectory() + "/apitoken.txt"))
             {
-                Email.Invoke((MethodInvoker)(() => Email.Text = File.ReadAllText(Directory.GetCurrentDirectory() + "/apitoken.txt")));
+                ApiToken.Text = File.ReadAllText(Directory.GetCurrentDirectory() + "/apitoken.txt");
                 checkBox1.Checked = true;
+            }
+            if (File.Exists(Directory.GetCurrentDirectory() + "/imgpath.txt"))
+            {
+                imgPath = File.ReadAllText(Directory.GetCurrentDirectory() + "/imgpath.txt");
+                textBox3.Text = imgPath;
+            }
+            else
+            {
+                imgPath = Directory.GetCurrentDirectory() + "\\img\\";
+                textBox3.Text = imgPath;
             }
         }
 
@@ -270,7 +282,7 @@ namespace WanikaniToAnki
 
             if (loadImgs)
             {
-                string[] fileArray = Directory.GetFiles(Directory.GetCurrentDirectory() + "/img/", "*.png");
+                string[] fileArray = Directory.GetFiles(imgPath, "*.png");
                 foreach (string a in fileArray)
                 {
                     fetchedKanjiDiagrams.Add(Path.GetFileName(a).Remove(Path.GetFileName(a).Length - 4)[0]);
@@ -283,10 +295,11 @@ namespace WanikaniToAnki
         private void Button1_Click(object sender, EventArgs e)
         {
             button1.Enabled = false;
+            button2.Enabled = false;
             checkBox1.Enabled = false;
             checkBox2.Enabled = false;
             init();
-            Match m = Regex.Match(Email.Text, "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}");
+            Match m = Regex.Match(ApiToken.Text, "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}");
             if (m.Success)
             {
                 token = m.Value;
@@ -298,6 +311,7 @@ namespace WanikaniToAnki
             else
             {
                 label2.Text = "invalid token";
+                button1.Enabled = true;
                 button1.Enabled = true;
                 checkBox1.Enabled = true;
                 checkBox2.Enabled = true;
@@ -436,7 +450,6 @@ namespace WanikaniToAnki
                 reader.Dispose();
                 stream.Close();
                 label2.Invoke((MethodInvoker)(() => label2.Text = "downloading images"));
-
                 foreach (KeyValuePair<long, KanjiOrVoc> a in kanji)
                 {
                     foreach (char c in a.Value.characters)
@@ -456,9 +469,9 @@ namespace WanikaniToAnki
                             {
                                 using (WebClient client = new WebClient())
                                 {
-                                    int filecount = Directory.GetFiles(Path.GetDirectoryName(Directory.GetCurrentDirectory() + "/img/")).Length;
-                                    client.DownloadFile(new Uri(jisho + match.Value), Directory.GetCurrentDirectory() + "/img/" + c + ".png");
-                                    if (filecount == Directory.GetFiles(Path.GetDirectoryName(Directory.GetCurrentDirectory() + "/img/")).Length)
+                                    int filecount = Directory.GetFiles(Path.GetDirectoryName(imgPath)).Length;
+                                    client.DownloadFile(new Uri(jisho + match.Value), imgPath + c + ".png");
+                                    if (filecount == Directory.GetFiles(Path.GetDirectoryName(imgPath)).Length)
                                     {
                                         Console.WriteLine("no image downloaded");
                                     }
@@ -489,6 +502,7 @@ namespace WanikaniToAnki
                 label2.Invoke((MethodInvoker)(() => label2.Text = "done. added " + newkanji + " new kanji and " + newvocs + " new vocabulary."));
                 label3.Invoke((MethodInvoker)(() => label3.Text = "done"));
                 button1.Invoke((MethodInvoker)(() => button1.Enabled = true));
+                button2.Invoke((MethodInvoker)(() => button2.Enabled = true));
                 checkBox1.Invoke((MethodInvoker)(() => checkBox1.Enabled = true));
                 checkBox2.Invoke((MethodInvoker)(() => checkBox2.Enabled = true));
             }
@@ -674,6 +688,27 @@ namespace WanikaniToAnki
                     Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()));
             }
             throw new DirectoryNotFoundException();
+        }
+
+        private void Button2_Click(object sender, EventArgs e)
+        {
+            using (var imgFolderDialog = new FolderBrowserDialog())
+            {
+                DialogResult result = imgFolderDialog.ShowDialog();
+
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(imgFolderDialog.SelectedPath))
+                {
+                    imgPath = imgFolderDialog.SelectedPath+"\\";
+                    textBox3.Text = imgPath;
+                }
+            }
+        }
+
+        private void TextBox3_TextChanged(object sender, EventArgs e)
+        {
+            if (!textBox3.Text.EndsWith("\\")) textBox3.Text += "\\";
+            imgPath = textBox3.Text;
+            File.WriteAllText(Directory.GetCurrentDirectory() + "/imgpath.txt", imgPath);
         }
     }
 }
