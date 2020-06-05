@@ -365,7 +365,7 @@ namespace WanikaniToAnki
                                 continue;
                             }
 
-                            if (resp == null) break;
+                            if (resp == null) return;
                             Console.WriteLine(((HttpWebResponse)resp).StatusCode + ": Kan");
                             stream = resp.GetResponseStream();
                             reader = new StreamReader(stream, Encoding.UTF8);
@@ -411,7 +411,7 @@ namespace WanikaniToAnki
                                 textBox2.Invoke((MethodInvoker)(() => textBox2.Text += voc[a.Data.SubjectId].characters + ", "));
                                 continue;
                             }
-                            if (resp == null) break;
+                            if (resp == null) return;
                             Console.WriteLine(((HttpWebResponse)resp).StatusCode + ": Vok");
                             stream = resp.GetResponseStream();
                             reader = new StreamReader(stream, Encoding.UTF8);
@@ -549,6 +549,7 @@ namespace WanikaniToAnki
                         else
                         {
                             Console.WriteLine("something went wrong when trying to reach wanikani, not rate limiting tho..\n" + e.ToString());
+                            label3.Invoke((MethodInvoker)(() => label3.Text = "something went wrong when trying to reach wanikani. Please try again later and restart the app."));
                             return null;
                         }
                     }
@@ -571,6 +572,7 @@ namespace WanikaniToAnki
                         else
                         {
                             Console.WriteLine("something went wrong when trying to reach wanikani, not rate limiting tho..\n" + e.ToString());
+                            label3.Invoke((MethodInvoker)(() => label3.Text = "something went wrong when trying to reach wanikani. Please try again later and restart the app."));
                             return null;
                         }
                     }
