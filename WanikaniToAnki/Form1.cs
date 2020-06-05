@@ -289,7 +289,7 @@ namespace WanikaniToAnki
                 }
             }
             label2.Invoke((MethodInvoker)(() => label2.Text = "Initializing done"));
-            button1.Invoke((MethodInvoker)(() => button1.Enabled = true));
+            //button1.Invoke((MethodInvoker)(() => button1.Enabled = true));
         }
 
         private void Button1_Click(object sender, EventArgs e)
@@ -312,7 +312,7 @@ namespace WanikaniToAnki
             {
                 label2.Text = "invalid token";
                 button1.Enabled = true;
-                button1.Enabled = true;
+                button2.Enabled = true;
                 checkBox1.Enabled = true;
                 checkBox2.Enabled = true;
                 return;
