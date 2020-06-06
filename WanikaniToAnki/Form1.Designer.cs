@@ -42,12 +42,13 @@
             this.button2 = new System.Windows.Forms.Button();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
-            // Email
+            // ApiToken
             // 
             this.ApiToken.Location = new System.Drawing.Point(89, 14);
-            this.ApiToken.Name = "Email";
+            this.ApiToken.Name = "ApiToken";
             this.ApiToken.Size = new System.Drawing.Size(467, 20);
             this.ApiToken.TabIndex = 0;
             // 
@@ -173,11 +174,23 @@
             this.label6.TabIndex = 16;
             this.label6.Text = "Imagefolder";
             // 
+            // checkBox3
+            // 
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.Location = new System.Drawing.Point(562, 68);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(160, 17);
+            this.checkBox3.TabIndex = 17;
+            this.checkBox3.Text = "include initiate assignements";
+            this.checkBox3.UseVisualStyleBackColor = true;
+            this.checkBox3.CheckedChanged += new System.EventHandler(this.CheckBox3_CheckedChanged);
+            // 
             // WanikaniToAnki
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(737, 429);
+            this.Controls.Add(this.checkBox3);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.textBox3);
             this.Controls.Add(this.button2);
@@ -215,6 +228,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.CheckBox checkBox3;
     }
 }
 

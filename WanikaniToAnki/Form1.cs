@@ -190,6 +190,11 @@ namespace WanikaniToAnki
                 imgPath = File.ReadAllText(Directory.GetCurrentDirectory() + "/imgpath.txt");
                 textBox3.Text = imgPath;
             }
+            if (File.Exists(Directory.GetCurrentDirectory() + "/initiate.txt"))
+            {
+                string initiate  = File.ReadAllText(Directory.GetCurrentDirectory() + "/initiate.txt");
+                checkBox3.Enabled = Boolean.Parse(initiate);
+            }
             else
             {
                 imgPath = Directory.GetCurrentDirectory() + "\\img\\";
@@ -298,6 +303,7 @@ namespace WanikaniToAnki
             button2.Enabled = false;
             checkBox1.Enabled = false;
             checkBox2.Enabled = false;
+            checkBox3.Enabled = false;
             init();
             Match m = Regex.Match(ApiToken.Text, "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}");
             if (m.Success)
@@ -315,6 +321,7 @@ namespace WanikaniToAnki
                 button2.Enabled = true;
                 checkBox1.Enabled = true;
                 checkBox2.Enabled = true;
+                checkBox3.Enabled = true;
                 return;
             }
             textBox1.Clear();
@@ -351,100 +358,100 @@ namespace WanikaniToAnki
                     first = false;
                     foreach (Datum2 a in assign.Data)
                     {
-                        if (a.Data.SubjectType == "kanji")
+                        if (a.Data.SrsStage > 0 || checkBox3.Checked)
                         {
-                            if (!kanji.ContainsKey(a.Data.SubjectId))
+                            if (a.Data.SubjectType == "kanji")
                             {
-                                resp = fireRequest(t.subject, a.Data.SubjectId);
-                            }
-                            else
-                            {
-                                Console.WriteLine("double, not requesting");
-                                textBox1.Invoke((MethodInvoker)(() => textBox1.Text += kanji[a.Data.SubjectId].characters + ", "));
-                                addedKanji.Add(kanji[a.Data.SubjectId].characters[0]);
-                                continue;
-                            }
+                                if (!kanji.ContainsKey(a.Data.SubjectId))
+                                {
+                                    resp = fireRequest(t.subject, a.Data.SubjectId);
+                                }
+                                else
+                                {
+                                    Console.WriteLine("double, not requesting");
+                                    textBox1.Invoke((MethodInvoker)(() => textBox1.Text += kanji[a.Data.SubjectId].characters + ", "));
+                                    addedKanji.Add(kanji[a.Data.SubjectId].characters[0]);
+                                    continue;
+                                }
 
-                            if (resp == null) return;
-                            Console.WriteLine(((HttpWebResponse)resp).StatusCode + ": Kan");
-                            stream = resp.GetResponseStream();
-                            reader = new StreamReader(stream, Encoding.UTF8);
-                            String responseString2 = reader.ReadToEnd();
-                            KanjiJSON kan = JsonConvert.DeserializeObject<KanjiJSON>(responseString2);
-                            string me = "";
-                            string re = "";
-                            foreach (Meaning m in kan.data.meanings)
-                            {
-                                if (m.primary) me = m.meaning;
-                                break;
-                            }
-                            foreach (Reading r in kan.data.readings)
-                            {
-                                if (r.primary) re = r.reading;
-                                break;
-                            }
-                            if (!kanji.ContainsKey(a.Data.SubjectId))
-                            {
-                                KanjiOrVoc kov = new KanjiOrVoc(me, re, kan.data.meanings, kan.data.readings, kan.data.characters);
-                                kanji.Add(a.Data.SubjectId, kov);
-                                newkanji++;
-                                addedKanji.Add(kov.characters[0]);
-                                label2.Invoke((MethodInvoker)(() => label2.Text = "added to collection: " + kov.characters));
-                                numberofkanji++;
-                            }
-                            else
-                            {
-                                Console.WriteLine("DOUBLE : " + a.Data.SubjectId);
-                            }
-                            textBox1.Invoke((MethodInvoker)(() => textBox1.AppendText( kanji[a.Data.SubjectId].characters + ", ")));
+                                if (resp == null) return;
+                                Console.WriteLine(((HttpWebResponse)resp).StatusCode + ": Kan");
+                                stream = resp.GetResponseStream();
+                                reader = new StreamReader(stream, Encoding.UTF8);
+                                String responseString2 = reader.ReadToEnd();
+                                KanjiJSON kan = JsonConvert.DeserializeObject<KanjiJSON>(responseString2);
+                                string me = "";
+                                string re = "";
+                                foreach (Meaning m in kan.data.meanings)
+                                {
+                                    if (m.primary) me = m.meaning;
+                                    break;
+                                }
+                                foreach (Reading r in kan.data.readings)
+                                {
+                                    if (r.primary) re = r.reading;
+                                    break;
+                                }
+                                if (!kanji.ContainsKey(a.Data.SubjectId))
+                                {
+                                    KanjiOrVoc kov = new KanjiOrVoc(me, re, kan.data.meanings, kan.data.readings, kan.data.characters);
+                                    kanji.Add(a.Data.SubjectId, kov);
+                                    newkanji++;
+                                    addedKanji.Add(kov.characters[0]);
+                                    label2.Invoke((MethodInvoker)(() => label2.Text = "added to collection: " + kov.characters));
+                                    numberofkanji++;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("DOUBLE : " + a.Data.SubjectId);
+                                }
+                                textBox1.Invoke((MethodInvoker)(() => textBox1.AppendText(kanji[a.Data.SubjectId].characters + ", ")));
 
-                        }
-                        else if (a.Data.SubjectType == "vocabulary")
-                        {
-                            if (!voc.ContainsKey(a.Data.SubjectId))
-                            {
-                                resp = fireRequest(t.subject, a.Data.SubjectId);
                             }
-                            else
+                            else if (a.Data.SubjectType == "vocabulary")
                             {
-                                Console.WriteLine("double, not requesting");
-                                textBox2.Invoke((MethodInvoker)(() => textBox2.Text += voc[a.Data.SubjectId].characters + ", "));
-                                continue;
+                                if (!voc.ContainsKey(a.Data.SubjectId))
+                                {
+                                    resp = fireRequest(t.subject, a.Data.SubjectId);
+                                }
+                                else
+                                {
+                                    Console.WriteLine("double, not requesting");
+                                    textBox2.Invoke((MethodInvoker)(() => textBox2.Text += voc[a.Data.SubjectId].characters + ", "));
+                                    continue;
+                                }
+                                if (resp == null) return;
+                                Console.WriteLine(((HttpWebResponse)resp).StatusCode + ": Vok");
+                                stream = resp.GetResponseStream();
+                                reader = new StreamReader(stream, Encoding.UTF8);
+                                String responseString2 = reader.ReadToEnd();
+                                VocabJSON vocab = JsonConvert.DeserializeObject<VocabJSON>(responseString2);
+                                string me = "";
+                                string re = "";
+                                foreach (Meaning2 m in vocab.data.meanings)
+                                {
+                                    if (m.primary) me = m.meaning;
+                                    break;
+                                }
+                                foreach (Reading2 r in vocab.data.readings)
+                                {
+                                    if (r.primary) re = r.reading;
+                                    break;
+                                }
+                                if (!voc.ContainsKey(a.Data.SubjectId))
+                                {
+                                    KanjiOrVoc kov = new KanjiOrVoc(me, re, vocab.data.meanings, vocab.data.readings, vocab.data.characters);
+                                    voc.Add(a.Data.SubjectId, kov);
+                                    newvocs++;
+                                    label2.Invoke((MethodInvoker)(() => label2.Text = "added to collection: " + kov.characters));
+                                }
+                                else {
+                                    Console.WriteLine("DOUBLE " + vocab.data.characters);
+                                }
+                                textBox2.Invoke((MethodInvoker)(() => textBox2.AppendText(voc[a.Data.SubjectId].characters + ", ")));
                             }
-                            if (resp == null) return;
-                            Console.WriteLine(((HttpWebResponse)resp).StatusCode + ": Vok");
-                            stream = resp.GetResponseStream();
-                            reader = new StreamReader(stream, Encoding.UTF8);
-                            String responseString2 = reader.ReadToEnd();
-                            VocabJSON vocab = JsonConvert.DeserializeObject<VocabJSON>(responseString2);
-                            string me = "";
-                            string re = "";
-                            foreach (Meaning2 m in vocab.data.meanings)
-                            {
-                                if (m.primary) me = m.meaning;
-                                break;
-                            }
-                            foreach (Reading2 r in vocab.data.readings)
-                            {
-                                if (r.primary) re = r.reading;
-                                break;
-                            }
-                            if (!voc.ContainsKey(a.Data.SubjectId))
-                            {
-                                KanjiOrVoc kov = new KanjiOrVoc(me, re, vocab.data.meanings, vocab.data.readings, vocab.data.characters);
-                                voc.Add(a.Data.SubjectId, kov);
-                                newvocs++;
-                                label2.Invoke((MethodInvoker)(() => label2.Text = "added to collection: " + kov.characters));
-                            }
-                            else
-                            {
-                                Console.WriteLine("DOUBLE " + vocab.data.characters);
-                            }
-                            textBox2.Invoke((MethodInvoker)(() => textBox2.AppendText(voc[a.Data.SubjectId].characters + ", ")));
                         }
                     }
-
-
                 }
                 Console.WriteLine("kanji added: " + numberofkanji);
                 reader.Dispose();
@@ -505,6 +512,7 @@ namespace WanikaniToAnki
                 button2.Invoke((MethodInvoker)(() => button2.Enabled = true));
                 checkBox1.Invoke((MethodInvoker)(() => checkBox1.Enabled = true));
                 checkBox2.Invoke((MethodInvoker)(() => checkBox2.Enabled = true));
+                checkBox3.Invoke((MethodInvoker)(() => checkBox3.Enabled = true));
             }
             catch (Exception e)
             {
@@ -711,6 +719,11 @@ namespace WanikaniToAnki
             if (!textBox3.Text.EndsWith("\\")) textBox3.Text += "\\";
             imgPath = textBox3.Text;
             File.WriteAllText(Directory.GetCurrentDirectory() + "/imgpath.txt", imgPath);
+        }
+
+        private void CheckBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            File.WriteAllText(Directory.GetCurrentDirectory() + "/initiate.txt", checkBox3.Checked.ToString());
         }
     }
 }
