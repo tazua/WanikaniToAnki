@@ -32,6 +32,7 @@ namespace WanikaniToAnki
         static System.Timers.Timer aTimer;
         Thread workerthread;
         string imgPath;
+        string[] configlines;
 
         private static void SetTimer()
         {
@@ -174,41 +175,72 @@ namespace WanikaniToAnki
         private void Form1_Shown(object sender, EventArgs e)
         {
             SetTimer();
-            
+            Directory.CreateDirectory("img");
+            Directory.CreateDirectory("csv");
+            configlines = new string[] { "", "", "" };
             label2.Text = "ready";
             label3.Text = "ready";
             ToolTip toolTip1 = new ToolTip();
             toolTip1.ShowAlways = true;
-            toolTip1.SetToolTip(checkBox2, "if checked, will fetch all kanji and vocabulary from wanikani,\n ignoring the already downloaded data in the genereated csv files.\n will take more time depending on the amount of unlocked lessons.");
-            if (File.Exists(Directory.GetCurrentDirectory() + "/apitoken.txt"))
+            toolTip1.SetToolTip(useCsvsCheckbox, "if checked, will fetch all kanji and vocabulary from wanikani,\n ignoring the already downloaded data in the genereated csv files.\n will take more time depending on the amount of unlocked lessons.");
+            /*if (File.Exists(Directory.GetCurrentDirectory() + "/apitoken.txt"))
             {
                 ApiToken.Text = File.ReadAllText(Directory.GetCurrentDirectory() + "/apitoken.txt");
-                checkBox1.Checked = true;
+                saveTokenCheckbox.Checked = true;
             }
             if (File.Exists(Directory.GetCurrentDirectory() + "/imgpath.txt"))
             {
                 imgPath = File.ReadAllText(Directory.GetCurrentDirectory() + "/imgpath.txt");
                 textBox3.Text = imgPath;
             }
-            if (File.Exists(Directory.GetCurrentDirectory() + "/initiate.txt"))
-            {
-                string initiate  = File.ReadAllText(Directory.GetCurrentDirectory() + "/initiate.txt");
-                checkBox3.Enabled = Boolean.Parse(initiate);
-            }
             else
             {
                 imgPath = Directory.GetCurrentDirectory() + "\\img\\";
                 textBox3.Text = imgPath;
             }
+            if (File.Exists(Directory.GetCurrentDirectory() + "/initiate.txt"))
+            {
+                string initiate = File.ReadAllText(Directory.GetCurrentDirectory() + "/initiate.txt");
+                includeAssignementsCheckbox.Checked = Boolean.Parse(initiate);
+            }*/
+            if (File.Exists(Directory.GetCurrentDirectory() + "/config.txt"))
+            {
+                configlines = File.ReadAllText(Directory.GetCurrentDirectory() + "/config.txt").Split(new string[] { "\n" }, StringSplitOptions.None);
+
+            }
+            else
+            {
+                makeDefaultConfigString();
+                writeConfigToFile();
+            }
+            token = configlines[0];
+            if (token.Length>0)
+            {
+                saveTokenCheckbox.Checked = true;
+            }
+            ApiToken.Text = token;
+            imgPath = configlines[1];
+            textBox3.Text = imgPath;
+            includeAssignementsCheckbox.Checked = Boolean.Parse(configlines[2]);
+        }
+        void makeDefaultConfigString()
+        {
+            configlines = new string[] { "", Directory.GetCurrentDirectory() + "\\img\\", "False"};
         }
 
-        private void init()
+        void writeConfigToFile()
         {
-            label2.Text = "initializing";
-            button1.Enabled = false;
-            
-            workerthread = new Thread(_init);
-            workerthread.Start();
+            File.WriteAllText(Directory.GetCurrentDirectory() + "/config.txt", getConfigString());
+        }
+
+        string getConfigString()
+        {
+            string ret = "";
+            foreach(string a in configlines)
+            {
+                ret += a + "\n";
+            }
+            return ret.Remove(ret.Length-1);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -222,22 +254,20 @@ namespace WanikaniToAnki
 
 
         }
-        void _init()
+        void init()
         {
             loadImgs = false;
             loadKanji = false;
             loadVoks = false;
-            Directory.CreateDirectory("img");
-            Directory.CreateDirectory("csv");
             kanji = new Dictionary<long, KanjiOrVoc>();
             voc = new Dictionary<long, KanjiOrVoc>();
             addedKanji = new Collection<char>();
             fetchedKanjiDiagrams = new Collection<char>();
-            if (File.Exists(Directory.GetCurrentDirectory() + "/csv/Kanji.csv") && !checkBox2.Checked)
+            if (File.Exists(Directory.GetCurrentDirectory() + "/csv/Kanji.csv") && !useCsvsCheckbox.Checked)
             {
                 loadKanji = true;
             }
-            if (File.Exists(Directory.GetCurrentDirectory() + "/csv/Vokabeln.csv") && !checkBox2.Checked)
+            if (File.Exists(Directory.GetCurrentDirectory() + "/csv/Vokabeln.csv") && !useCsvsCheckbox.Checked)
             {
                 loadVoks = true;
             }
@@ -301,17 +331,19 @@ namespace WanikaniToAnki
         {
             button1.Enabled = false;
             button2.Enabled = false;
-            checkBox1.Enabled = false;
-            checkBox2.Enabled = false;
-            checkBox3.Enabled = false;
-            init();
+            saveTokenCheckbox.Enabled = false;
+            useCsvsCheckbox.Enabled = false;
+            includeAssignementsCheckbox.Enabled = false;
+            label2.Text = "initializing";
             Match m = Regex.Match(ApiToken.Text, "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}");
             if (m.Success)
             {
                 token = m.Value;
-                if (checkBox1.Checked)
+                if (saveTokenCheckbox.Checked)
                 {
-                    File.WriteAllText(Directory.GetCurrentDirectory() + "/apitoken.txt", token);
+                    configlines[0] = token;
+                    writeConfigToFile();
+                    //File.WriteAllText(Directory.GetCurrentDirectory() + "/apitoken.txt", token);
                 }
             }
             else
@@ -319,20 +351,21 @@ namespace WanikaniToAnki
                 label2.Text = "invalid token";
                 button1.Enabled = true;
                 button2.Enabled = true;
-                checkBox1.Enabled = true;
-                checkBox2.Enabled = true;
-                checkBox3.Enabled = true;
+                saveTokenCheckbox.Enabled = true;
+                useCsvsCheckbox.Enabled = true;
+                includeAssignementsCheckbox.Enabled = true;
                 return;
             }
             textBox1.Clear();
             textBox2.Clear();
-            aTimer.Enabled = true;
-            Thread t = new Thread(apistuff);
-            t.Start();
+            workerthread = new Thread(apistuff);
+            workerthread.Start();
         }
 
         void apistuff()
         {
+            init();
+            aTimer.Enabled = true;
             try
             {
 
@@ -358,7 +391,7 @@ namespace WanikaniToAnki
                     first = false;
                     foreach (Datum2 a in assign.Data)
                     {
-                        if (a.Data.SrsStage > 0 || checkBox3.Checked)
+                        if (a.Data.SrsStage > 0 || includeAssignementsCheckbox.Checked)
                         {
                             if (a.Data.SubjectType == "kanji")
                             {
@@ -510,9 +543,9 @@ namespace WanikaniToAnki
                 label3.Invoke((MethodInvoker)(() => label3.Text = "done"));
                 button1.Invoke((MethodInvoker)(() => button1.Enabled = true));
                 button2.Invoke((MethodInvoker)(() => button2.Enabled = true));
-                checkBox1.Invoke((MethodInvoker)(() => checkBox1.Enabled = true));
-                checkBox2.Invoke((MethodInvoker)(() => checkBox2.Enabled = true));
-                checkBox3.Invoke((MethodInvoker)(() => checkBox3.Enabled = true));
+                saveTokenCheckbox.Invoke((MethodInvoker)(() => saveTokenCheckbox.Enabled = true));
+                useCsvsCheckbox.Invoke((MethodInvoker)(() => useCsvsCheckbox.Enabled = true));
+                includeAssignementsCheckbox.Invoke((MethodInvoker)(() => includeAssignementsCheckbox.Enabled = true));
             }
             catch (Exception e)
             {
@@ -718,12 +751,41 @@ namespace WanikaniToAnki
         {
             if (!textBox3.Text.EndsWith("\\")) textBox3.Text += "\\";
             imgPath = textBox3.Text;
-            File.WriteAllText(Directory.GetCurrentDirectory() + "/imgpath.txt", imgPath);
+            configlines[1] = imgPath;
+            writeConfigToFile();
+            //File.WriteAllText(Directory.GetCurrentDirectory() + "/imgpath.txt", imgPath);
         }
 
         private void CheckBox3_CheckedChanged(object sender, EventArgs e)
         {
-            File.WriteAllText(Directory.GetCurrentDirectory() + "/initiate.txt", checkBox3.Checked.ToString());
+            configlines[2] = includeAssignementsCheckbox.Checked.ToString();
+            writeConfigToFile();
+            //File.WriteAllText(Directory.GetCurrentDirectory() + "/initiate.txt", includeAssignementsCheckbox.Checked.ToString());
+        }
+
+        private void SaveTokenCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (saveTokenCheckbox.Checked)
+            {
+                configlines[0] = ApiToken.Text;
+            } else
+            {
+                configlines[0] = "";
+            }
+            writeConfigToFile();
+        }
+
+        private void ApiToken_TextChanged(object sender, EventArgs e)
+        {
+            if (saveTokenCheckbox.Checked)
+            {
+                configlines[0] = ApiToken.Text;
+            }
+            else
+            {
+                configlines[0] = "";
+            }
+            writeConfigToFile();
         }
     }
 }

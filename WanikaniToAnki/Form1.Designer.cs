@@ -33,16 +33,16 @@
             this.button1 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.saveTokenCheckbox = new System.Windows.Forms.CheckBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.useCsvsCheckbox = new System.Windows.Forms.CheckBox();
             this.button2 = new System.Windows.Forms.Button();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
+            this.includeAssignementsCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // ApiToken
@@ -51,6 +51,7 @@
             this.ApiToken.Name = "ApiToken";
             this.ApiToken.Size = new System.Drawing.Size(467, 20);
             this.ApiToken.TabIndex = 0;
+            this.ApiToken.TextChanged += new System.EventHandler(this.ApiToken_TextChanged);
             // 
             // label1
             // 
@@ -89,15 +90,16 @@
             this.label3.TabIndex = 6;
             this.label3.Text = "progress";
             // 
-            // checkBox1
+            // saveTokenCheckbox
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(562, 18);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(79, 17);
-            this.checkBox1.TabIndex = 8;
-            this.checkBox1.Text = "save token";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.saveTokenCheckbox.AutoSize = true;
+            this.saveTokenCheckbox.Location = new System.Drawing.Point(562, 18);
+            this.saveTokenCheckbox.Name = "saveTokenCheckbox";
+            this.saveTokenCheckbox.Size = new System.Drawing.Size(79, 17);
+            this.saveTokenCheckbox.TabIndex = 8;
+            this.saveTokenCheckbox.Text = "save token";
+            this.saveTokenCheckbox.UseVisualStyleBackColor = true;
+            this.saveTokenCheckbox.CheckedChanged += new System.EventHandler(this.SaveTokenCheckbox_CheckedChanged);
             // 
             // textBox1
             // 
@@ -137,15 +139,15 @@
             this.label5.TabIndex = 12;
             this.label5.Text = "vocabulary";
             // 
-            // checkBox2
+            // useCsvsCheckbox
             // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(562, 91);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(92, 17);
-            this.checkBox2.TabIndex = 13;
-            this.checkBox2.Text = "dont use csvs";
-            this.checkBox2.UseVisualStyleBackColor = true;
+            this.useCsvsCheckbox.AutoSize = true;
+            this.useCsvsCheckbox.Location = new System.Drawing.Point(562, 91);
+            this.useCsvsCheckbox.Name = "useCsvsCheckbox";
+            this.useCsvsCheckbox.Size = new System.Drawing.Size(92, 17);
+            this.useCsvsCheckbox.TabIndex = 13;
+            this.useCsvsCheckbox.Text = "dont use csvs";
+            this.useCsvsCheckbox.UseVisualStyleBackColor = true;
             // 
             // button2
             // 
@@ -174,32 +176,32 @@
             this.label6.TabIndex = 16;
             this.label6.Text = "Imagefolder";
             // 
-            // checkBox3
+            // includeAssignementsCheckbox
             // 
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(562, 68);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(160, 17);
-            this.checkBox3.TabIndex = 17;
-            this.checkBox3.Text = "include initiate assignements";
-            this.checkBox3.UseVisualStyleBackColor = true;
-            this.checkBox3.CheckedChanged += new System.EventHandler(this.CheckBox3_CheckedChanged);
+            this.includeAssignementsCheckbox.AutoSize = true;
+            this.includeAssignementsCheckbox.Location = new System.Drawing.Point(562, 68);
+            this.includeAssignementsCheckbox.Name = "includeAssignementsCheckbox";
+            this.includeAssignementsCheckbox.Size = new System.Drawing.Size(160, 17);
+            this.includeAssignementsCheckbox.TabIndex = 17;
+            this.includeAssignementsCheckbox.Text = "include initiate assignements";
+            this.includeAssignementsCheckbox.UseVisualStyleBackColor = true;
+            this.includeAssignementsCheckbox.CheckedChanged += new System.EventHandler(this.CheckBox3_CheckedChanged);
             // 
             // WanikaniToAnki
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(737, 429);
-            this.Controls.Add(this.checkBox3);
+            this.Controls.Add(this.includeAssignementsCheckbox);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.textBox3);
             this.Controls.Add(this.button2);
-            this.Controls.Add(this.checkBox2);
+            this.Controls.Add(this.useCsvsCheckbox);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.saveTokenCheckbox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.button1);
@@ -219,16 +221,16 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox saveTokenCheckbox;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.CheckBox checkBox2;
+        private System.Windows.Forms.CheckBox useCsvsCheckbox;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.CheckBox checkBox3;
+        private System.Windows.Forms.CheckBox includeAssignementsCheckbox;
     }
 }
 
