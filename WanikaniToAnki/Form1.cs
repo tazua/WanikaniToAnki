@@ -28,7 +28,7 @@ namespace WanikaniToAnki
         Dictionary<long, KanjiOrVoc> voc;
         string token = "";
         static int requestcounter = 59;
-        static int timeuntilreset = 61;
+        static int timeuntilreset = 60;
         static System.Timers.Timer aTimer;
         Thread workerthread;
         string imgPath;
@@ -49,13 +49,12 @@ namespace WanikaniToAnki
             if (timeuntilreset < 1)
             {
                 requestcounter = 59;
-                timeuntilreset = 61;
+                timeuntilreset = 60;
             }
             else
             {
                 timeuntilreset--;
             }
-
         }
         enum t
         {
@@ -206,7 +205,6 @@ namespace WanikaniToAnki
             if (File.Exists(Directory.GetCurrentDirectory() + "/config.txt"))
             {
                 configlines = File.ReadAllText(Directory.GetCurrentDirectory() + "/config.txt").Split(new string[] { "\n" }, StringSplitOptions.None);
-
             }
             else
             {
@@ -327,8 +325,43 @@ namespace WanikaniToAnki
             //button1.Invoke((MethodInvoker)(() => button1.Enabled = true));
         }
 
+        string[] listAnkiProfiles()
+        {
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+            string res = "";
+            foreach (DriveInfo d in allDrives)
+            {
+                res += DirSearch(d.Name, "Anki2");
+            }
+            return res.Remove(res.Length- "SplitString1234555".Length).Split(new string[] { "SplitString1234555" }, StringSplitOptions.None);
+        }
+
+        string DirSearch(string sDir, string dirname)
+        {
+            string res = "";
+            try
+            {
+                foreach (string d in Directory.GetDirectories(sDir))
+                {
+                    if (d.Contains(dirname))
+                    {
+                        res += d + "SplitString1234555";
+                    }
+                    res +=DirSearch(d,dirname);
+                }
+            }
+            catch (System.Exception excpt)
+            {
+                Console.WriteLine(excpt.Message);
+            }
+            return res;
+        }
+
         private void Button1_Click(object sender, EventArgs e)
         {
+            //Console.WriteLine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+            
+            //C:\Users\Tazua\AppData\Roaming\Anki2
             button1.Enabled = false;
             button2.Enabled = false;
             saveTokenCheckbox.Enabled = false;
@@ -786,6 +819,16 @@ namespace WanikaniToAnki
                 configlines[0] = "";
             }
             writeConfigToFile();
+        }
+
+        private void Button3_Click(object sender, EventArgs e)
+        {
+            Form2 a = new Form2();
+            a.ShowDialog();
+            if (a.DialogResult == DialogResult.OK)
+            {
+                textBox3.Text = a.ReturnValue1;
+            }
         }
     }
 }
