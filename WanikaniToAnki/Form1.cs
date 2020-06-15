@@ -167,6 +167,20 @@ namespace WanikaniToAnki
         public WanikaniToAnki()
         {
             InitializeComponent();
+            FileStream fs;
+            StreamWriter wr;
+            TextWriter tw = Console.Out;
+            try
+            {
+                fs = new FileStream("log.txt", FileMode.OpenOrCreate, FileAccess.Write);
+                wr = new StreamWriter(fs);
+                wr.AutoFlush = true;
+                Console.SetOut(wr);
+            } catch (Exception e)
+            {
+
+            }
+            
             this.Shown += new System.EventHandler(this.Form1_Shown);
 
         }
@@ -269,7 +283,7 @@ namespace WanikaniToAnki
             {
                 loadVoks = true;
             }
-            if (!CheckDirectoryEmpty_Fast(Directory.GetCurrentDirectory() + "/img"))
+            if (!CheckDirectoryEmpty_Fast(imgPath))
             {
                 loadImgs = true;
             }
@@ -279,6 +293,7 @@ namespace WanikaniToAnki
         {
             if (loadKanji)
             {
+                Console.WriteLine("loading Kanji");
                 label2.Invoke((MethodInvoker)(() => label2.Text = "loading Kanji from File"));
                 label3.Invoke((MethodInvoker)(() => label3.Text = "starting"));
                 string[] lines = File.ReadAllText(Directory.GetCurrentDirectory() + "/csv/Kanji.csv").Split(new string[] { "\n" }, StringSplitOptions.None);
@@ -293,10 +308,11 @@ namespace WanikaniToAnki
                     counter++;
                 }
                 label3.Invoke((MethodInvoker)(() => label3.Text = "done"));
-
+                Console.WriteLine("loaded Kanji");
             }
             if (loadVoks)
             {
+                Console.WriteLine("loading Voks");
                 label2.Invoke((MethodInvoker)(() => label2.Text = "loading Voks from File"));
                 label3.Invoke((MethodInvoker)(() => label3.Text = "starting"));
                 string[] lines = File.ReadAllText(Directory.GetCurrentDirectory() + "/csv/Vokabeln.csv").Split(new string[] { "\n" }, StringSplitOptions.None);
@@ -311,15 +327,19 @@ namespace WanikaniToAnki
                     counter++;
                 }
                 label3.Invoke((MethodInvoker)(() => label3.Text = "done"));
+                Console.WriteLine("loaded Voks");
             }
 
             if (loadImgs)
             {
+                Console.WriteLine("loading imgs");
                 string[] fileArray = Directory.GetFiles(imgPath, "*.png");
                 foreach (string a in fileArray)
                 {
+                    Console.WriteLine("loaded "+ Path.GetFileName(a));
                     fetchedKanjiDiagrams.Add(Path.GetFileName(a).Remove(Path.GetFileName(a).Length - 4)[0]);
                 }
+                Console.WriteLine("loaded imgs");
             }
             label2.Invoke((MethodInvoker)(() => label2.Text = "Initializing done"));
             //button1.Invoke((MethodInvoker)(() => button1.Enabled = true));
@@ -401,14 +421,13 @@ namespace WanikaniToAnki
             aTimer.Enabled = true;
             try
             {
-
-
+                Console.WriteLine("starting first request");
                 WebResponse resp = fireRequest(t.assignement, null);
                 Stream stream = resp.GetResponseStream();
                 StreamReader reader = new StreamReader(stream, Encoding.UTF8);
                 String responseString = reader.ReadToEnd();
                 Assignements assign = JsonConvert.DeserializeObject<Assignements>(responseString);
-                Console.WriteLine(assign.TotalCount);
+                Console.WriteLine("assignments: "+ assign.TotalCount);
                 int numberofkanji = 0;
                 bool first = true;
                 while (assign.Pages.NextUrl != null || first)
@@ -532,7 +551,7 @@ namespace WanikaniToAnki
                             label3.Invoke((MethodInvoker)(() => label3.Text = "current char: " + c));
                             HttpWebRequest hwr = (HttpWebRequest)WebRequest.Create(jisho + "kanji/details/" + c);
                             resp = hwr.GetResponse();
-                            Console.WriteLine(((HttpWebResponse)resp).StatusCode);
+                            Console.WriteLine("jisho.org: " + c + " - HTTP Response " + ((HttpWebResponse)resp).StatusCode);
                             stream = resp.GetResponseStream();
                             reader = new StreamReader(stream, Encoding.UTF8);
                             responseString = reader.ReadToEnd();
@@ -546,7 +565,7 @@ namespace WanikaniToAnki
                                     client.DownloadFile(new Uri(jisho + match.Value), imgPath + c + ".png");
                                     if (filecount == Directory.GetFiles(Path.GetDirectoryName(imgPath)).Length)
                                     {
-                                        Console.WriteLine("no image downloaded");
+                                        Console.WriteLine("no image downloaded for: " + c);
                                     }
                                     else
                                     {
@@ -556,7 +575,7 @@ namespace WanikaniToAnki
                             }
                             else
                             {
-                                Console.WriteLine("no image found for: " + c);
+                                Console.WriteLine("no image found on jisho for: " + c);
                             }
                         }
                         if (a.Value.imgName.Length < 2 && fetchedKanjiDiagrams.Contains(c))
