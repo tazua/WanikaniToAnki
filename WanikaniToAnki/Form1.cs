@@ -271,6 +271,8 @@ namespace WanikaniToAnki
             loadImgs = false;
             loadKanji = false;
             loadVoks = false;
+            newkanji = 0;
+            newvocs = 0;
             kanji = new Dictionary<long, KanjiOrVoc>();
             voc = new Dictionary<long, KanjiOrVoc>();
             addedKanji = new Collection<char>();
@@ -384,6 +386,7 @@ namespace WanikaniToAnki
             //C:\Users\Tazua\AppData\Roaming\Anki2
             button1.Enabled = false;
             button2.Enabled = false;
+            button3.Enabled = false;
             saveTokenCheckbox.Enabled = false;
             useCsvsCheckbox.Enabled = false;
             includeAssignementsCheckbox.Enabled = false;
@@ -404,6 +407,7 @@ namespace WanikaniToAnki
                 label2.Text = "invalid token";
                 button1.Enabled = true;
                 button2.Enabled = true;
+                button3.Enabled = true;
                 saveTokenCheckbox.Enabled = true;
                 useCsvsCheckbox.Enabled = true;
                 includeAssignementsCheckbox.Enabled = true;
@@ -595,6 +599,7 @@ namespace WanikaniToAnki
                 label3.Invoke((MethodInvoker)(() => label3.Text = "done"));
                 button1.Invoke((MethodInvoker)(() => button1.Enabled = true));
                 button2.Invoke((MethodInvoker)(() => button2.Enabled = true));
+                button3.Invoke((MethodInvoker)(() => button3.Enabled = true));
                 saveTokenCheckbox.Invoke((MethodInvoker)(() => saveTokenCheckbox.Enabled = true));
                 useCsvsCheckbox.Invoke((MethodInvoker)(() => useCsvsCheckbox.Enabled = true));
                 includeAssignementsCheckbox.Invoke((MethodInvoker)(() => includeAssignementsCheckbox.Enabled = true));
